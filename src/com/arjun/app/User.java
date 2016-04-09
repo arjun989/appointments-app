@@ -10,13 +10,16 @@ import com.google.appengine.api.datastore.Key;
 public class User {
 	@Persistent
 	private String email;
+	
 	@PrimaryKey
 	@Persistent
 	private Key id;
+	
 	// the list of contacts that are belonging to this user
     // the parent variable of the Contact class will map the
     // contact to the ContactUser.
     @Persistent(mappedBy="parent")
+	//@Persistent(defaultFetchGroup = "true")
 	private ArrayList<Appointment> appointments;
 	
 	public User(Key id ,String n){

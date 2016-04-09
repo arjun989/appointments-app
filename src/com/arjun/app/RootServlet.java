@@ -18,7 +18,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
 public class RootServlet extends HttpServlet {
-	private String output = "";
+	ArrayList<String> lst=new ArrayList<>();
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		// we need to get access to the google user service
@@ -27,7 +27,6 @@ public class RootServlet extends HttpServlet {
 		String login_url = us.createLoginURL("/");
 		String logout_url = us.createLogoutURL("/");
 		String addAppointment = "/addServlet";
-        //u=null;
 		// attach a few things to the request such that we can access them in
 		// the jsp
 		req.setAttribute("user", u);
@@ -35,42 +34,63 @@ public class RootServlet extends HttpServlet {
 		req.setAttribute("logout_url", logout_url);
 		req.setAttribute("addAppointment", addAppointment);
 		String uid;
+		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try{
 			if (u != null) {
 				uid = u.getUserId();
-				//req.getSession().setAttribute("user_id", uid);
 				//displaying current appointments
-				PersistenceManager pm = null;
 				Key user_key = KeyFactory.createKey("User", uid);
 				com.arjun.app.User user;
 				// print out what was stored for each user
-				pm = PMF.get().getPersistenceManager();
 				user = pm.getObjectById(com.arjun.app.User.class, user_key);
-				//resp.getWriter().println("Appointments for user: " + user.getEmail() + " :");
-				ArrayList<String> lst=new ArrayList<>();
+				lst.clear();
 				for (Appointment ctemp : user.getAppointments()) {
 					lst.add("Name: " + ctemp.getName() + "  Date : " + ctemp.getDate() + "  Time : " + ctemp.getTime()+"     ~~~    ");
-					//resp.getWriter().println("Name: " + ctemp.getName() + " Date : " + ctemp.getDate() + " Time : " + ctemp.getTime());
 				}
 				req.setAttribute("appointments", lst);
 				
-			} 
+			}
 		}catch(Exception e){
 			req.setAttribute("appointments", null);
 		}
-		//else {
-//			req.getSession().setAttribute("user_id", "");
-//		}
-		
-		
-
+		finally{
+			pm.close();
+		}
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
 		rd.forward(req, resp);
 	}
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
+		// we need to get access to the google user service
+		UserService us = UserServiceFactory.getUserService();
+		com.google.appengine.api.users.User u = us.getCurrentUser();
+		if(u==null)
+			return;		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Key user_key = KeyFactory.createKey("User", u.getUserId());
+		com.arjun.app.User user =pm.getObjectById(com.arjun.app.User.class, user_key);
+		
+		for (int i=0;i<user.getAppointments().size();i++){
+			
+			if(req.getParameter((i+"dlt"))!=null){
+				//delete this user
+				pm.deletePersistent(user.getAppointments().get(i));
+				pm.close();
+				displayAlert("Appointment Deleted ! ","'/'",resp.getWriter());
+				break;
+			}else if(req.getParameter((i+"edt"))!=null){
+				//Edit this appointment
+				break;
+			}
+		}
+	}
+	
+	private void displayAlert(String msg, String path, PrintWriter out) {
+		out.println("<script type=\"text/javascript\">");
+		out.println("alert('" + msg + "');");
+		out.println("location=" + path + ";");
+		out.println("</script>");
 	}
 
 }

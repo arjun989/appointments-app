@@ -3,15 +3,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Welcome</title>
-<style>
-	.boxed1 {
-		border: 3px solid red;
-	}
-</style>
-</head>
 
+<title>Welcome</title>
+
+<style>
+.boxed1 {
+	border: 3px solid red;
+}
+</style>
+<script type="text/javascript">
+	function removeElement(n) {
+		var element = document.getElementById(id);
+		// A bit of robustness helps...
+		if (element && element.parentNode) {
+			element.parentNode.removeChild(element);
+		}
+	}
+</script>
+</head>
 
 <body>
 
@@ -30,21 +39,28 @@
 			<br />
 			<br />
 			<br />
-			<span id="container">&nbsp;</span>
-
+			<script>
+				if (document.getElementById("app")) {
+					document.getElementById("app").parentNode
+							.removeChild(document.getElementById("app"));
+				}
+			</script>
 			<%
 				ArrayList<String> arr = (ArrayList<String>) request.getAttribute("appointments");
 						if (arr != null) {
-							out.write("<div class=\"boxed1\" align=\"center\">");
-							out.write("<h2 align=\"center\" >~Your Current Appointments ~</h2><br/>");
+							//out.write("");
+							out.write("<div id= \"app\" class=\"boxed1\" align=\"center\">");
+							out.write("<form method=\"post\">");
+							out.write("<h2   align=\"center\" >~Your Current Appointments ~</h2><br/>");
 							for (int i = 0; i < arr.size(); i++) {
-								
+
 								out.write("<lable>" + arr.get(i) + "</lable>");
-								out.write("<input type=\"button\" name=\"" + (i + "edt") + "\" value=\"Edit\" \\>");
-								out.write("<input type=\"button\" name=\"" + (i + "dlt") + "\" value=\"Delete\" \\>");
+								out.write("<input type=\"submit\" name=\"" + (i + "edt") + "\" value=\"Edit\" \\>");
+								out.write("<input type=\"submit\" name=\"" + (i + "dlt") + "\" value=\"Delete\" \\>");
 								out.write("<br/><br/>");
-								
+
 							}
+							out.write("</form>");
 							out.write("</div>");
 						}
 			%>

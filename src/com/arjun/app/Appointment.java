@@ -3,6 +3,7 @@ package com.arjun.app;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -11,7 +12,8 @@ import com.google.appengine.api.datastore.Key;
 public class Appointment {
 	
 	// the id of the contact as this is not going to be directly
-	// retrieved we will allow the keys for this to be auto generated @PrimaryKey
+	// retrieved we will allow the keys for this to be auto generated 
+	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Key id;
 	@Persistent
