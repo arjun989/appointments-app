@@ -9,7 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
@@ -46,13 +45,56 @@ public class addServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
+		PrintWriter out = resp.getWriter();
+		// get access to the user service to get our user
+		UserService us = UserServiceFactory.getUserService();
+		com.google.appengine.api.users.User u = us.getCurrentUser();
+
+		String n = req.getParameter("name").trim();
+		String d = req.getParameter("date").trim();
+		String t = req.getParameter("time").trim();
+		if (n.equals("") || d.equals("") || t.equals("")){
+			displayAlert("Invalid Input !",out);
+			return;
+		}
+		String uid = u.getUserId();
+		PersistenceManager pm = null;
+		Key user_key = KeyFactory.createKey("User", uid);
+		com.arjun.app.User user;
+		Appointment ap = new Appointment(n, d, t);
+
+		try {
+			// Check if the KEY exists...
+			pm = PMF.get().getPersistenceManager();
+			user = pm.getObjectById(com.arjun.app.User.class, user_key);
+			ap.setParent(user);
+			user.addAppointment(ap);
+			pm.makePersistent(ap);
+			pm.makePersistent(user);
+			displayAlert("Appointment Added !", out);
+
+		} catch (Exception e) {
+			// This user doesnt exist yet, so add it...
+			user = new com.arjun.app.User(user_key, u.getEmail());
+			pm.makePersistent(user);
+			pm.close();
+			// Now get user
+			pm = PMF.get().getPersistenceManager();
+			user = pm.getObjectById(com.arjun.app.User.class, user_key);
+			ap.setParent(user);
+			user.addAppointment(ap);
+			pm.makePersistent(ap);
+			pm.makePersistent(user);
+			displayAlert("Appointment Added !", out);
+		} finally {
+			pm.close();
+		}
 	}
 
 	private void displayAlert(String msg, PrintWriter out) {
 		out.println("<script type=\"text/javascript\">");
 		out.println("alert('" + msg + "');");
-		out.println("location='/';");
+		out.println("location='/addServlet';");
 		out.println("</script>");
 	}
 

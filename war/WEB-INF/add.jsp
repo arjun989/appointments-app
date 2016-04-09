@@ -11,7 +11,20 @@
 	<c:choose>
 
 		<c:when test="${ loggedin !=null }">
-			<h2 align="center">This page is for Adding appointments</h2>
+			<!-- 			<h2 align="center">This page is for Adding appointments</h2><br/>-->
+			<div align="center" action="/">
+				<form method="post">
+					<br /> <br />
+					<h3>Add Appointment</h3>
+					<br /> <input type="text" name="name" /><br /> 
+					<input type="text" name="date" /><br />
+					<input type="text" name="time" /><br /> <input name="add" type="submit" />
+				</form>
+				<br />
+				<br />
+			</div>
+			<br />
+			<br />
 		</c:when>
 
 		<c:otherwise>
