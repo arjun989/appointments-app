@@ -25,12 +25,22 @@ public class RootServlet extends HttpServlet {
 		com.google.appengine.api.users.User u = us.getCurrentUser();
 		String login_url = us.createLoginURL("/");
 		String logout_url = us.createLogoutURL("/");
+		String addAppointment = "/addServlet";
 
 		// attach a few things to the request such that we can access them in
 		// the jsp
 		req.setAttribute("user", u);
 		req.setAttribute("login_url", login_url);
 		req.setAttribute("logout_url", logout_url);
+		req.setAttribute("addAppointment", addAppointment);
+		String uid;
+		
+		if (u!= null) {
+			 uid= u.getUserId();
+			req.getSession().setAttribute("user_id", uid);
+		} else {
+			req.getSession().setAttribute("user_id", "");
+		}
 
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
