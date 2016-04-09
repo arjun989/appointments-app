@@ -21,19 +21,18 @@ public class addServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// we will be outputting html to the client
 		resp.setContentType("text/html");
+		// get access to the user service to get our user
+		UserService us = UserServiceFactory.getUserService();
+		com.google.appengine.api.users.User u = us.getCurrentUser();
 
 		// get the value of the attribute input from the session and forward it
 		// to the // JSP
-		String uid = (String) req.getSession().getAttribute("user_id");
-		if (uid != null && uid.length() > 0) {
+		//String uid = (String) req.getSession().getAttribute("user_id");
+		if (u != null ) {
 			req.setAttribute("loggedin", 1);
 		} else {
 			req.setAttribute("loggedin", null);
 		}
-
-		// get a request dispatcher and launch a jsp that will render our page
-		UserService us = UserServiceFactory.getUserService();
-		com.google.appengine.api.users.User u = us.getCurrentUser();
 		String login_url = us.createLoginURL("/");
 		req.setAttribute("user", u);
 		req.setAttribute("login_url", login_url);
@@ -53,8 +52,8 @@ public class addServlet extends HttpServlet {
 		String n = req.getParameter("name").trim();
 		String d = req.getParameter("date").trim();
 		String t = req.getParameter("time").trim();
-		if (n.equals("") || d.equals("") || t.equals("")){
-			displayAlert("Invalid Input !",out);
+		if (n.equals("") || d.equals("") || t.equals("")) {
+			displayAlert("Invalid Input !", "'/addServlet'", out);
 			return;
 		}
 		String uid = u.getUserId();
@@ -71,7 +70,7 @@ public class addServlet extends HttpServlet {
 			user.addAppointment(ap);
 			pm.makePersistent(ap);
 			pm.makePersistent(user);
-			displayAlert("Appointment Added !", out);
+			displayAlert("Appointment Added !", "'/'", out);
 
 		} catch (Exception e) {
 			// This user doesnt exist yet, so add it...
@@ -85,16 +84,16 @@ public class addServlet extends HttpServlet {
 			user.addAppointment(ap);
 			pm.makePersistent(ap);
 			pm.makePersistent(user);
-			displayAlert("Appointment Added !", out);
+			displayAlert("Appointment Added !", "'/'", out);
 		} finally {
 			pm.close();
 		}
 	}
 
-	private void displayAlert(String msg, PrintWriter out) {
+	private void displayAlert(String msg, String path, PrintWriter out) {
 		out.println("<script type=\"text/javascript\">");
 		out.println("alert('" + msg + "');");
-		out.println("location='/addServlet';");
+		out.println("location=" + path + ";");
 		out.println("</script>");
 	}
 

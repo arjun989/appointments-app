@@ -2,6 +2,7 @@ package com.arjun.app;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.jdo.PersistenceManager;
@@ -26,7 +27,7 @@ public class RootServlet extends HttpServlet {
 		String login_url = us.createLoginURL("/");
 		String logout_url = us.createLogoutURL("/");
 		String addAppointment = "/addServlet";
-
+        //u=null;
 		// attach a few things to the request such that we can access them in
 		// the jsp
 		req.setAttribute("user", u);
@@ -34,13 +35,34 @@ public class RootServlet extends HttpServlet {
 		req.setAttribute("logout_url", logout_url);
 		req.setAttribute("addAppointment", addAppointment);
 		String uid;
-		
-		if (u!= null) {
-			 uid= u.getUserId();
-			req.getSession().setAttribute("user_id", uid);
-		} else {
-			req.getSession().setAttribute("user_id", "");
+		try{
+			if (u != null) {
+				uid = u.getUserId();
+				//req.getSession().setAttribute("user_id", uid);
+				//displaying current appointments
+				PersistenceManager pm = null;
+				Key user_key = KeyFactory.createKey("User", uid);
+				com.arjun.app.User user;
+				// print out what was stored for each user
+				pm = PMF.get().getPersistenceManager();
+				user = pm.getObjectById(com.arjun.app.User.class, user_key);
+				//resp.getWriter().println("Appointments for user: " + user.getEmail() + " :");
+				ArrayList<String> lst=new ArrayList<>();
+				for (Appointment ctemp : user.getAppointments()) {
+					lst.add("Name: " + ctemp.getName() + "  Date : " + ctemp.getDate() + "  Time : " + ctemp.getTime()+"     ~~~    ");
+					//resp.getWriter().println("Name: " + ctemp.getName() + " Date : " + ctemp.getDate() + " Time : " + ctemp.getTime());
+				}
+				req.setAttribute("appointments", lst);
+				
+			} 
+		}catch(Exception e){
+			req.setAttribute("appointments", null);
 		}
+		//else {
+//			req.getSession().setAttribute("user_id", "");
+//		}
+		
+		
 
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
