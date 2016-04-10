@@ -81,6 +81,8 @@ public class RootServlet extends HttpServlet {
 				break;
 			}else if(req.getParameter((i+"edt"))!=null){
 				//Edit this appointment
+				req.getSession().setAttribute("update",user.getAppointments().get(i).getId());
+				resp.sendRedirect("/editServlet");
 				break;
 			}
 		}
